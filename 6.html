@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<!-- Modern Encoder/Decoder Logo -->
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='encGrad' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%236c63ff'/><stop offset='100%' style='stop-color:%2342a5f5'/></linearGradient><filter id='encShadow' x='-20%' y='-20%' width='140%' height='140%'><feDropShadow dx='2' dy='3' stdDeviation='3' flood-color='%23000' flood-opacity='0.3'/></filter></defs><rect width='100' height='100' fill='url(%23encGrad)' rx='20' filter='url(%23encShadow)'/><path d='M30 35 L45 50 L30 65' stroke='white' stroke-width='4' fill='none' stroke-linecap='round'/><path d='M70 35 L55 50 L70 65' stroke='white' stroke-width='4' fill='none' stroke-linecap='round'/><rect x='40' y='40' width='20' height='20' fill='white' opacity='0.8' rx='3'/></svg>">
+<title>Multi-Encoding Encoder/Decoder</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  :root {
+    --primary: #6c63ff;
+    --secondary: #ff6584;
+    --accent: #42a5f5;
+    --dark: #121212;
+    --light: #f8f9fa;
+    --card-bg: rgba(255, 255, 255, 0.1);
+    --glass: rgba(255, 255, 255, 0.05);
+    --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    color: var(--light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+    line-height: 1.6;
+  }
+
+  /* Animated Background */
+  .bg-animation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+    background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #0f0c29);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+  }
+
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .card {
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    padding: 2rem;
+    border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    width: min(900px, 100%);
+    transition: var(--transition);
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    background: linear-gradient(45deg, var(--primary), var(--secondary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+    position: relative;
+    display: inline-block;
+  }
+
+  h1::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 3px;
+    background: linear-gradient(45deg, var(--primary), var(--secondary));
+    border-radius: 2px;
+  }
+
+  .subtitle {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1rem;
+  }
+
+  .mode-selector {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 1rem 1.5rem;
+    border: 2px solid transparent;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--light);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: var(--transition);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-width: 140px;
+  }
+
+  .btn.active {
+    background: linear-gradient(45deg, var(--primary), var(--accent));
+    border-color: var(--primary);
+    box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
+  }
+
+  .btn:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .encoding-selector {
+    margin-bottom: 1.5rem;
+  }
+
+  select {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid transparent;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    transition: var(--transition);
+  }
+
+  select:focus {
+    border-color: var(--primary);
+    outline: none;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  label i {
+    color: var(--primary);
+    width: 20px;
+  }
+
+  textarea {
+    width: 100%;
+    height: 140px;
+    border-radius: 0.5rem;
+    border: 2px solid transparent;
+    background: rgba(255, 255, 255, 0.95);
+    color: #000;
+    padding: 1rem;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    resize: vertical;
+    transition: var(--transition);
+  }
+
+  textarea:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+
+  .action-btn {
+    flex: 1;
+    padding: 1rem 1.5rem;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: var(--transition);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .action-btn.primary {
+    background: linear-gradient(45deg, var(--primary), var(--accent));
+    color: white;
+  }
+
+  .action-btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(108, 99, 255, 0.4);
+  }
+
+  .action-btn.secondary {
+    background: linear-gradient(45deg, #64748b, #94a3b8);
+    color: white;
+  }
+
+  .action-btn.secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(100, 116, 139, 0.4);
+  }
+
+  .output-section {
+    margin-top: 1.5rem;
+  }
+
+  .output-item {
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid transparent;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: var(--transition);
+    position: relative;
+  }
+
+  .output-item:hover {
+    border-color: var(--primary);
+  }
+
+  .output-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    color: #000;
+    font-weight: 600;
+  }
+
+  .output-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .output-title i {
+    color: var(--primary);
+  }
+
+  .copy-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.3rem;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .copy-btn:hover {
+    background: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(108, 99, 255, 0.3);
+  }
+
+  .copy-btn.copied {
+    background: #10b981;
+  }
+
+  .output-content {
+    color: #000;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    word-break: break-all;
+    white-space: pre-wrap;
+    line-height: 1.4;
+    min-height: 20px;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 0.3rem;
+  }
+
+  .output-placeholder {
+    color: #94a3b8;
+    font-style: italic;
+  }
+
+  .credit {
+    text-align: center;
+    margin-top: 2rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+  }
+
+  .credit span {
+    color: var(--secondary);
+    font-weight: 600;
+  }
+
+  /* Notification */
+  .notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--primary);
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    transform: translateX(150%);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .notification.show {
+    transform: translateX(0);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .mode-selector {
+      flex-direction: column;
+    }
+    
+    .action-buttons {
+      flex-direction: column;
+    }
+    
+    .card {
+      padding: 1.5rem;
+    }
+    
+    h1 {
+      font-size: 1.8rem;
+    }
+    
+    .output-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    
+    .copy-btn {
+      align-self: flex-end;
+    }
+  }
+</style>
+</head>
+<body>
+  <!-- Animated Background -->
+  <div class="bg-animation"></div>
+
+  <!-- Notification -->
+  <div class="notification" id="notification">
+    <i class="fas fa-check-circle"></i>
+    <span id="notificationText">Operation completed!</span>
+  </div>
+
+  <div class="card">
+    <div class="header">
+      <h1>Encoder / Decoder</h1>
+      <p class="subtitle">Convert text between multiple encodings and formats</p>
+    </div>
+
+    <div class="mode-selector">
+      <button class="btn active" id="mode-encode">
+        <i class="fas fa-lock"></i>
+        Encode
+      </button>
+      <button class="btn" id="mode-decode">
+        <i class="fas fa-lock-open"></i>
+        Decode
+      </button>
+    </div>
+
+    <div class="encoding-selector">
+      <select id="encoding">
+        <option value="utf-8">UTF-8</option>
+        <option value="windows-1251">Windows-1251</option>
+        <option value="windows-1252">Windows-1252</option>
+        <option value="windows-1254">Windows-1254</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="input">
+        <i class="fas fa-keyboard"></i>
+        Input Text
+      </label>
+      <textarea id="input" placeholder="Type or paste text to encode/decode…"></textarea>
+    </div>
+
+    <div class="action-buttons">
+      <button class="action-btn primary" id="btn-run">
+        <i class="fas fa-play"></i>
+        Process
+      </button>
+      <button class="action-btn secondary" id="btn-clear">
+        <i class="fas fa-broom"></i>
+        Clear All
+      </button>
+    </div>
+
+    <div class="output-section">
+      <label>
+        <i class="fas fa-code"></i>
+        Output Results:
+      </label>
+      
+      <div class="output-item">
+        <div class="output-header">
+          <div class="output-title">
+            <i class="fas fa-hashtag"></i>
+            Hex Format:
+          </div>
+          <button class="copy-btn" onclick="copyOutput('hex')">
+            <i class="fas fa-copy"></i>
+            Copy
+          </button>
+        </div>
+        <div class="output-content" id="out-hex">Output will appear here...</div>
+      </div>
+
+      <div class="output-item">
+        <div class="output-header">
+          <div class="output-title">
+            <i class="fas fa-code"></i>
+            Base64 Format:
+          </div>
+          <button class="copy-btn" onclick="copyOutput('b64')">
+            <i class="fas fa-copy"></i>
+            Copy
+          </button>
+        </div>
+        <div class="output-content" id="out-b64">Output will appear here...</div>
+      </div>
+
+      <div class="output-item">
+        <div class="output-header">
+          <div class="output-title">
+            <i class="fas fa-link"></i>
+            URL Format:
+          </div>
+          <button class="copy-btn" onclick="copyOutput('url')">
+            <i class="fas fa-copy"></i>
+            Copy
+          </button>
+        </div>
+        <div class="output-content" id="out-url">Output will appear here...</div>
+      </div>
+    </div>
+
+    <div class="credit">
+      Crafted with <i class="fas fa-heart" style="color: var(--secondary);"></i> by <span>Kailash</span>
+    </div>
+  </div>
+
+<script>
+const $ = s => document.querySelector(s);
+const input = $('#input'), outHex=$('#out-hex'), outB64=$('#out-b64'), outURL=$('#out-url');
+let mode="encode";
+
+// ================= FULL TABLES =================
+function buildTable(base, map) {
+  const arr=[...Array(128).keys()];
+  for (let i=0;i<128;i++) arr.push(map[i]??0xFFFD);
+  return arr;
+}
+
+// From official code page docs
+const tables = {
+  "windows-1251": buildTable(128, [
+    0x0402,0x0403,0x201A,0x0453,0x201E,0x2026,0x2020,0x2021,
+    0x20AC,0x2030,0x0409,0x2039,0x040A,0x040C,0x040B,0x040F,
+    0x0452,0x2018,0x2019,0x201C,0x201D,0x2022,0x2013,0x2014,
+    0x0000,0x2122,0x0459,0x203A,0x045A,0x045C,0x045B,0x045F,
+    0x00A0,0x040E,0x045E,0x0408,0x00A4,0x0490,0x00A6,0x00A7,
+    0x0401,0x00A9,0x0404,0x00AB,0x00AC,0x00AD,0x00AE,0x0407,
+    0x00B0,0x00B1,0x0406,0x0456,0x0491,0x00B5,0x00B6,0x00B7,
+    0x0451,0x2116,0x0454,0x00BB,0x0458,0x0405,0x0455,0x0457,
+    0x0410,0x0411,0x0412,0x0413,0x0414,0x0415,0x0416,0x0417,
+    0x0418,0x0419,0x041A,0x041B,0x041C,0x041D,0x041E,0x041F,
+    0x0420,0x0421,0x0422,0x0423,0x0424,0x0425,0x0426,0x0427,
+    0x0428,0x0429,0x042A,0x042B,0x042C,0x042D,0x042E,0x042F,
+    0x0430,0x0431,0x0432,0x0433,0x0434,0x0435,0x0436,0x0437,
+    0x0438,0x0439,0x043A,0x043B,0x043C,0x043D,0x043E,0x043F,
+    0x0440,0x0441,0x0442,0x0443,0x0444,0x0445,0x0446,0x0447,
+    0x0448,0x0449,0x044A,0x044B,0x044C,0x044D,0x044E,0x044F
+  ]),
+  "windows-1252": buildTable(128, [
+    0x20AC,0xFFFD,0x201A,0x0192,0x201E,0x2026,0x2020,0x2021,
+    0x02C6,0x2030,0x0160,0x2039,0x0152,0xFFFD,0x017D,0xFFFD,
+    0xFFFD,0x2018,0x2019,0x201C,0x201D,0x2022,0x2013,0x2014,
+    0x02DC,0x2122,0x0161,0x203A,0x0153,0xFFFD,0x017E,0x0178,
+    0x00A0,0x00A1,0x00A2,0x00A3,0x00A4,0x00A5,0x00A6,0x00A7,
+    0x00A8,0x00A9,0x00AA,0x00AB,0x00AC,0x00AD,0x00AE,0x00AF,
+    0x00B0,0x00B1,0x00B2,0x00B3,0x00B4,0x00B5,0x00B6,0x00B7,
+    0x00B8,0x00B9,0x00BA,0x00BB,0x00BC,0x00BD,0x00BE,0x00BF,
+    0x00C0,0x00C1,0x00C2,0x00C3,0x00C4,0x00C5,0x00C6,0x00C7,
+    0x00C8,0x00C9,0x00CA,0x00CB,0x00CC,0x00CD,0x00CE,0x00CF,
+    0x00D0,0x00D1,0x00D2,0x00D3,0x00D4,0x00D5,0x00D6,0x00D7,
+    0x00D8,0x00D9,0x00DA,0x00DB,0x00DC,0x00DD,0x00DE,0x00DF,
+    0x00E0,0x00E1,0x00E2,0x00E3,0x00E4,0x00E5,0x00E6,0x00E7,
+    0x00E8,0x00E9,0x00EA,0x00EB,0x00EC,0x00ED,0x00EE,0x00EF,
+    0x00F0,0x00F1,0x00F2,0x00F3,0x00F4,0x00F5,0x00F6,0x00F7,
+    0x00F8,0x00F9,0x00FA,0x00FB,0x00FC,0x00FD,0x00FE,0x00FF
+  ]),
+  "windows-1254": buildTable(128, [
+    0x20AC,0xFFFD,0x201A,0x0192,0x201E,0x2026,0x2020,0x2021,
+    0x02C6,0x2030,0x0160,0x2039,0x0152,0xFFFD,0xFFFD,0xFFFD,
+    0xFFFD,0x2018,0x2019,0x201C,0x201D,0x2022,0x2013,0x2014,
+    0x02DC,0x2122,0x0161,0x203A,0x0153,0xFFFD,0xFFFD,0xFFFD,
+    0x00A0,0x00A1,0x00A2,0x00A3,0x00A4,0x00A5,0x00A6,0x00A7,
+    0x00A8,0x00A9,0x00AA,0x00AB,0x00AC,0x00AD,0x00AE,0x00AF,
+    0x00B0,0x00B1,0x00B2,0x00B3,0x00B4,0x00B5,0x00B6,0x00B7,
+    0x00B8,0x00B9,0x00BA,0x00BB,0x00BC,0x00BD,0x00BE,0x00BF,
+    0x00C0,0x00C1,0x00C2,0x00C3,0x00C4,0x00C5,0x00C6,0x00C7,
+    0x00C8,0x00C9,0x00CA,0x00CB,0x00CC,0x00CD,0x00CE,0x00CF,
+    0x011E,0x00D1,0x00D2,0x00D3,0x00D4,0x00D5,0x00D6,0x00D7,
+    0x00D8,0x00D9,0x00DA,0x00DB,0x00DC,0x0130,0x015E,0x00DF,
+    0x00E0,0x00E1,0x00E2,0x00E3,0x00E4,0x00E5,0x00E6,0x00E7,
+    0x00E8,0x00E9,0x00EA,0x00EB,0x00EC,0x00ED,0x00EE,0x00EF,
+    0x011F,0x00F1,0x00F2,0x00F3,0x00F4,0x00F5,0x00F6,0x00F7,
+    0x00F8,0x00F9,0x00FA,0x00FB,0x00FC,0x0131,0x015F,0x00FF
+  ])
+};
+
+// Build reverse lookup
+const reverseTables = {};
+for (let enc in tables) {
+  reverseTables[enc] = {};
+  tables[enc].forEach((cp,i)=>{ reverseTables[enc][cp]=i; });
+}
+
+ function toHex(uint8){ 
+    return Array.from(uint8)
+      .map(b => '=' + b.toString(16).toUpperCase().padStart(2,'0'))
+      .join('');
+  }
+
+  function toB64(uint8){ 
+    return btoa(String.fromCharCode(...uint8)); 
+  }
+
+  function toURL(uint8){ 
+    return Array.from(uint8)
+      .map(b => '%' + b.toString(16).toUpperCase().padStart(2,'0'))
+      .join('');
+  }
+
+  function encodeCustom(text,enc){
+    if(enc.startsWith("utf-")) return new TextEncoder(enc).encode(text);
+    const rev=reverseTables[enc];
+    const arr=[];
+    for(let ch of text){
+      const cp=ch.codePointAt(0);
+      arr.push(rev[cp]!==undefined?rev[cp]:0x3F); // ? if missing
+    }
+    return new Uint8Array(arr);
+  }
+
+  function decodeCustom(bytes,enc){
+    if(enc.startsWith("utf-")) return new TextDecoder(enc).decode(bytes);
+    const tbl=tables[enc];
+    return Array.from(bytes).map(b=>String.fromCodePoint(tbl[b]||0x3F)).join('');
+  }
+
+  function showNotification(message) {
+    const notification = document.getElementById('notification');
+    const notificationText = document.getElementById('notificationText');
+    
+    notificationText.textContent = message;
+    notification.classList.add('show');
+    
+    setTimeout(() => {
+      notification.classList.remove('show');
+    }, 3000);
+  }
+
+  function copyOutput(type) {
+    let content = '';
+    let formatName = '';
+    
+    switch(type) {
+      case 'hex':
+        content = outHex.textContent;
+        formatName = 'Hex';
+        break;
+      case 'b64':
+        content = outB64.textContent;
+        formatName = 'Base64';
+        break;
+      case 'url':
+        content = outURL.textContent;
+        formatName = 'URL';
+        break;
+    }
+    
+    if (!content || content.includes('Output will appear here') || content.includes('❌ Error')) {
+      showNotification('Nothing to copy!');
+      return;
+    }
+    
+    // Get the copy button that was clicked
+    const copyBtn = event.target.closest('.copy-btn');
+    
+    try {
+      navigator.clipboard.writeText(content).then(() => {
+        // Visual feedback
+        const originalText = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        copyBtn.classList.add('copied');
+        
+        showNotification(`${formatName} format copied to clipboard!`);
+        
+        // Reset button after 2 seconds
+        setTimeout(() => {
+          copyBtn.innerHTML = originalText;
+          copyBtn.classList.remove('copied');
+        }, 2000);
+      });
+    } catch (err) {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = content;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      
+      // Visual feedback for fallback
+      const originalText = copyBtn.innerHTML;
+      copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+      copyBtn.classList.add('copied');
+      
+      showNotification(`${formatName} format copied to clipboard!`);
+      
+      setTimeout(() => {
+        copyBtn.innerHTML = originalText;
+        copyBtn.classList.remove('copied');
+      }, 2000);
+    }
+  }
+
+  function run(){
+    const encSel=$('#encoding').value;
+    const text=input.value;
+
+    if (!text.trim()) {
+      showNotification('Please enter some text to process!');
+      return;
+    }
+
+    try{
+      if(mode==="encode"){
+        const bytes=encodeCustom(text,encSel);
+        outHex.textContent=toHex(bytes);
+        outB64.textContent=toB64(bytes);
+        outURL.textContent=toURL(bytes);
+        showNotification('Text encoded successfully!');
+      }else{
+        let bytes;
+        if(text.trim().startsWith("=")){ 
+          // decode "=XX=YY..." format
+          const arr=(text.match(/=[0-9A-Fa-f]{2}/g)||[])
+            .map(x=>parseInt(x.slice(1),16));
+          bytes=new Uint8Array(arr);
+        }else if(text.trim().startsWith("%")){
+          const arr=text.match(/%[0-9A-Fa-f]{2}/g)||[];
+          bytes=new Uint8Array(arr.map(x=>parseInt(x.slice(1),16)));
+        }else{
+          const bin=atob(text); 
+          bytes=Uint8Array.from(bin,c=>c.charCodeAt(0));
+        }
+        const decoded=decodeCustom(bytes,encSel);
+        outHex.textContent=decoded;
+        outB64.textContent=decoded;
+        outURL.textContent=decoded;
+        showNotification('Text decoded successfully!');
+      }
+    }catch(e){
+      outHex.textContent=outB64.textContent=outURL.textContent="❌ Error: " + e.message;
+      showNotification('Error processing text!');
+    }
+  
+}
+
+$('#btn-run').addEventListener('click',run);
+$('#btn-clear').addEventListener('click',()=>{
+  input.value=""; 
+  outHex.textContent="Output will appear here...";
+  outB64.textContent="Output will appear here...";
+  outURL.textContent="Output will appear here...";
+  showNotification('All fields cleared!');
+});
+
+$('#mode-encode').addEventListener('click',()=>{
+  mode="encode"; 
+  $('#mode-encode').classList.add('active'); 
+  $('#mode-decode').classList.remove('active');
+  showNotification('Switched to Encode mode');
+});
+
+$('#mode-decode').addEventListener('click',()=>{
+  mode="decode"; 
+  $('#mode-decode').classList.add('active'); 
+  $('#mode-encode').classList.remove('active');
+  showNotification('Switched to Decode mode');
+});
+
+// Auto-process on Enter key
+input.addEventListener('keypress', function(e) {
+  if (e.key === 'Enter' && e.ctrlKey) {
+    run();
+  }
+});
+</script>
+</body>
+</html>
