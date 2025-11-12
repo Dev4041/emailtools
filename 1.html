@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mailing Tools Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Paper Plane Tab Logo -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236c63ff'><path d='M2.6 13.083l3.452 1.511L16 9.167l-6 7 8.6 3.916a1 1 0 0 0 1.399-.85l1-15a1.002 1.002 0 0 0-1.424-.972L2.6 13.083z'/></svg>">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #6c63ff;
+      --secondary: #ff6584;
+      --accent: #42a5f5;
+      --dark: #121212;
+      --light: #f8f9fa;
+      --card-bg: rgba(255, 255, 255, 0.1);
+      --glass: rgba(255, 255, 255, 0.05);
+      --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: var(--light);
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Animated Background */
+    .bg-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -2;
+      background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #0f0c29);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .floating-elements {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .floating-element {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      animation: float 20s infinite linear;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0) rotate(0deg); }
+      100% { transform: translateY(-1000px) rotate(720deg); }
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+      width: 100%;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .logo {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 32px rgba(108, 99, 255, 0.3);
+      animation: logoFloat 3s ease-in-out infinite;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .logo::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transform: translateX(-100%);
+      animation: logoShine 3s ease-in-out infinite;
+    }
+
+    @keyframes logoFloat {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-10px) rotate(5deg); }
+    }
+
+    @keyframes logoShine {
+      0% { transform: translateX(-100%); }
+      50%, 100% { transform: translateX(100%); }
+    }
+
+    .logo i {
+      font-size: 2.5rem;
+      color: white;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    }
+
+    .gradient-text {
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-weight: 700;
+      background: linear-gradient(45deg, var(--primary), var(--secondary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1rem;
+      position: relative;
+      display: inline-block;
+    }
+
+    .gradient-text::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 4px;
+      background: linear-gradient(45deg, var(--primary), var(--secondary));
+      border-radius: 2px;
+    }
+
+    .subtitle {
+      font-size: 1.2rem;
+      color: rgba(255, 255, 255, 0.7);
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .button-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    .tool-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 1.5rem;
+      text-align: center;
+      transition: var(--transition);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    .tool-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: left 0.5s;
+    }
+
+    .tool-card:hover::before {
+      left: 100%;
+    }
+
+    .tool-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .tool-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: var(--primary);
+      transition: var(--transition);
+    }
+
+    .tool-card:hover .tool-icon {
+      transform: scale(1.1);
+      color: var(--secondary);
+    }
+
+    .tool-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: white;
+    }
+
+    .tool-desc {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.7);
+      line-height: 1.5;
+      margin-bottom: 1rem;
+    }
+
+    .tool-btn {
+      background: linear-gradient(45deg, var(--primary), var(--accent));
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 50px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'Poppins', sans-serif;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .tool-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 15px rgba(108, 99, 255, 0.4);
+    }
+
+    .credit {
+      margin-top: 3rem;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.9rem;
+    }
+
+    .credit span {
+      color: var(--secondary);
+      font-weight: 600;
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+      
+      .button-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+      
+      .tool-card {
+        padding: 1.2rem;
+      }
+      
+      .logo-container {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      
+      .logo {
+        width: 60px;
+        height: 60px;
+      }
+      
+      .logo i {
+        font-size: 2rem;
+      }
+    }
+
+    /* Loading Animation */
+    .loader {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    .loader-spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid rgba(255, 255, 255, 0.3);
+      border-top: 5px solid var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 1rem;
+    }
+
+    .loader-text {
+      color: white;
+      font-size: 1rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Notification */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--primary);
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      transform: translateX(150%);
+      transition: transform 0.3s ease;
+      z-index: 1000;
+    }
+
+    .notification.show {
+      transform: translateX(0);
+    }
+  </style>
+</head>
+<body>
+  <!-- Animated Background -->
+  <div class="bg-animation"></div>
+  
+  <!-- Floating Elements -->
+  <div class="floating-elements" id="floatingElements"></div>
+
+  <!-- Loading Screen -->
+  <div class="loader" id="loader">
+    <div class="loader-spinner"></div>
+    <div class="loader-text">Loading Tool...</div>
+  </div>
+
+  <!-- Notification -->
+  <div class="notification" id="notification">
+    Tool opened successfully!
+  </div>
+
+  <div class="container">
+    <div class="header">
+      <!-- New Logo Section -->
+      <div class="logo-container">
+        <div class="logo">
+          <i class="fas fa-paper-plane"></i>
+        </div>
+      </div>
+      <h1 class="gradient-text">Mailing Tools</h1>
+      <p class="subtitle">A comprehensive suite of professional email marketing tools to streamline your workflow and boost productivity</p>
+    </div>
+
+    <div class="button-grid">
+      <!-- PMTA Configuration -->
+      <div class="tool-card">
+        <div class="tool-icon">
+          <i class="fas fa-server"></i>
+        </div>
+        <h3 class="tool-title">PMTA Configuration</h3>
+        <p class="tool-desc">Configure and optimize your PowerMTA settings for maximum deliverability</p>
+        <button class="tool-btn" onclick="openTool('2.html')">
+          Open Tool <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+
+      <!-- Random Length String Generator -->
+      <div class="tool-card">
+        <div class="tool-icon">
+          <i class="fas fa-random"></i>
+        </div>
+        <h3 class="tool-title">Random Length String Generator</h3>
+        <p class="tool-desc">Generate strings with variable lengths for testing and data generation</p>
+        <button class="tool-btn" onclick="openTool('Random_Length_String_Generator.html')">
+          Open Tool <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+
+      <!-- Fixed Length String & Nouns Generator -->
+      <div class="tool-card">
+        <div class="tool-icon">
+          <i class="fas fa-text-width"></i>
+        </div>
+        <h3 class="tool-title">Fixed Length String & Nouns Generator</h3>
+        <p class="tool-desc">Create strings with specific lengths and generate noun combinations</p>
+        <button class="tool-btn" onclick="openTool('Fixed_Length_String_Generator.html')">
+          Open Tool <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+
+      <!-- Dynamic Hex Block & Code Generator -->
+      <div class="tool-card">
+        <div class="tool-icon">
+          <i class="fas fa-code"></i>
+        </div>
+        <h3 class="tool-title">Dynamic Hex Block & Code Generator</h3>
+        <p class="tool-desc">Generate hexadecimal blocks and custom code snippets dynamically</p>
+        <button class="tool-btn" onclick="openTool('Dynamic_Hex_Block_&_Code_Generator.html')">
+          Open Tool <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+
+      <!-- Encoder & Decoder -->
+      <div class="tool-card">
+        <div class="tool-icon">
+          <i class="fas fa-lock"></i>
+        </div>
+        <h3 class="tool-title">Encoder & Decoder</h3>
+        <p class="tool-desc">Encode and decode various formats including Base64, URL, and more</p>
+        <button class="tool-btn" onclick="openTool('Encoder_&_Decoder.html')">
+          Open Tool <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="credit">
+      Crafted with <i class="fas fa-heart" style="color: var(--secondary);"></i> by <span>Kailash</span>
+    </div>
+  </div>
+
+  <script>
+    // Create floating elements
+    function createFloatingElements() {
+      const container = document.getElementById('floatingElements');
+      const colors = [
+        'rgba(108, 99, 255, 0.1)',
+        'rgba(255, 101, 132, 0.1)',
+        'rgba(66, 165, 245, 0.1)'
+      ];
+      
+      for (let i = 0; i < 15; i++) {
+        const element = document.createElement('div');
+        element.className = 'floating-element';
+        
+        const size = Math.random() * 100 + 20;
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        
+        element.style.width = `${size}px`;
+        element.style.height = `${size}px`;
+        element.style.background = color;
+        element.style.left = `${Math.random() * 100}%`;
+        element.style.animationDuration = `${Math.random() * 30 + 20}s`;
+        element.style.animationDelay = `${Math.random() * 5}s`;
+        
+        container.appendChild(element);
+      }
+    }
+
+    // SIMPLE Tool opening function - No complex checks
+    function openTool(url) {
+      const loader = document.getElementById('loader');
+      const notification = document.getElementById('notification');
+      
+      // Show loader
+      loader.style.display = 'flex';
+      
+      // Simple navigation with loading animation
+      setTimeout(() => {
+        // Hide loader
+        loader.style.display = 'none';
+        
+        // Show success notification briefly
+        notification.classList.add('show');
+        
+        setTimeout(() => {
+          notification.classList.remove('show');
+          // DIRECT NAVIGATION - This will work if files exist
+          window.location.href = url;
+        }, 800);
+      }, 1200);
+    }
+
+    // Add keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      const buttons = document.querySelectorAll('.tool-btn');
+      let currentIndex = Array.from(buttons).findIndex(button => button === document.activeElement);
+      
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        currentIndex = (currentIndex + 1) % buttons.length;
+        buttons[currentIndex].focus();
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        currentIndex = (currentIndex - 1 + buttons.length) % buttons.length;
+        buttons[currentIndex].focus();
+      } else if (e.key === 'Enter' && document.activeElement.classList.contains('tool-btn')) {
+        const url = document.activeElement.getAttribute('onclick').match(/'([^']+)'/)[1];
+        openTool(url);
+      }
+    });
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', () => {
+      createFloatingElements();
+      
+      // Add focus to first button
+      const firstButton = document.querySelector('.tool-btn');
+      if (firstButton) {
+        firstButton.setAttribute('tabindex', '0');
+      }
+    });
+
+    // Add click event to entire card
+    document.querySelectorAll('.tool-card').forEach(card => {
+      card.addEventListener('click', function(e) {
+        // Only navigate if the click wasn't on the button itself
+        if (!e.target.classList.contains('tool-btn') && !e.target.closest('.tool-btn')) {
+          const button = this.querySelector('.tool-btn');
+          const url = button.getAttribute('onclick').match(/'([^']+)'/)[1];
+          openTool(url);
+        }
+      });
+    });
+
+    // Debug function to check if files exist
+    function checkFiles() {
+      const files = [
+        'PMTA_Config1.html',
+        'Random_Length_String_Generator.html',
+        'Fixed_Length_String_Generator.html',
+        'Dynamic_Hex_Block_&_Code_Generator.html',
+        'Encoder_&_Decoder.html'
+      ];
+      
+      files.forEach(file => {
+        fetch(file, { method: 'HEAD' })
+          .then(response => {
+            console.log(`${file}: ${response.ok ? 'EXISTS' : 'MISSING'}`);
+          })
+          .catch(() => {
+            console.log(`${file}: MISSING (Network error)`);
+          });
+      });
+    }
+
+    // Uncomment the line below to check if files exist in console
+    // checkFiles();
+  </script>
+</body>
+</html>
